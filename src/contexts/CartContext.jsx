@@ -41,7 +41,10 @@ export function CartProvider({ children }) {
 
   const addToCart = useCallback(
     async (product, quantity = 1, size = null, color = null) => {
-      await safeReserveStock(product.id, quantity)
+      const reserved = await safeReserveStock(product.id, quantity)
+      if (!reserved) {
+        throw new Error('Not enough stock available for this product.')
+      }
 
       const cartKey = `${product.id}::${size ?? 'NOSIZE'}::${color ?? 'NOCOLOR'}`
 
@@ -72,11 +75,17 @@ export function CartProvider({ children }) {
       const delta = nextQuantity - currentQuantity
 
       if (delta > 0) {
-        await safeReserveStock(targetItem.id, delta)
+        const reserved = await safeReserveStock(targetItem.id, delta)
+        if (!reserved) {
+          throw new Error('Not enough stock available for this product.')
+        }
       }
 
       if (delta < 0) {
-        await safeReleaseStock(targetItem.id, Math.abs(delta))
+        const released = await safeReleaseStock(targetItem.id, Math.abs(delta))
+        if (!released) {
+          throw new Error('Unable to update stock for this cart item.')
+        }
       }
 
       setItems((prev) =>
@@ -92,7 +101,10 @@ export function CartProvider({ children }) {
     async (cartKey) => {
       const targetItem = items.find((item) => item.cartKey === cartKey)
       if (targetItem) {
-        await safeReleaseStock(targetItem.id, targetItem.quantity)
+        const released = await safeReleaseStock(targetItem.id, targetItem.quantity)
+        if (!released) {
+          throw new Error('Unable to update stock for this cart item.')
+        }
       }
 
       setItems((prev) => prev.filter((item) => item.cartKey !== cartKey))
@@ -131,7 +143,10 @@ export function CartProvider({ children }) {
   )
 
   const clearCart = useCallback(async () => {
-    await Promise.all(items.map((item) => safeReleaseStock(item.id, item.quantity)))
+    const releaseResults = await Promise.all(items.map((item) => safeReleaseStock(item.id, item.quantity)))
+    if (releaseResults.some((released) => !released)) {
+      throw new Error('Unable to clear cart stock reservations.')
+    }
     setItems([])
   }, [items, safeReleaseStock])
 

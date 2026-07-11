@@ -157,7 +157,7 @@ export default function HomePage() {
 
           <Link
             to="/shop"
-            className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-black-500 transition hover:text-gray-600"
+            className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.18em] text-black transition hover:text-gray-600"
           >
             View all
             <FiArrowRight className="h-4 w-4" />
@@ -168,7 +168,7 @@ export default function HomePage() {
           {categoryCards.map((category, index) => (
             <Link
               key={category.key}
-              to="/shop"
+              to={`/shop?category=${encodeURIComponent(category.key)}`}
               className="group relative min-h-[23rem] overflow-hidden rounded-3xl border border-gray-200 bg-black shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-xl"
               style={{ animationDelay: `${index * 120}ms` }}
             >

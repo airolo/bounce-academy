@@ -62,7 +62,7 @@ export function RequireAdmin({ children }) {
     return () => {
       active = false
     }
-  }, [user?.id, role, loading, refreshProfile])
+  }, [user, role, loading, refreshProfile])
 
   if (loading || checkingRole) return <LoadingScreen />
 

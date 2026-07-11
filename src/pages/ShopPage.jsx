@@ -40,6 +40,17 @@ export default function ShopPage() {
     loadProducts()
   }, [user])
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search)
+    const categoryParam = searchParams.get('category')
+
+    if (categoryParam) {
+      setCategory(categoryParam)
+    } else {
+      setCategory('All')
+    }
+  }, [location.search])
+
   const categories = useMemo(() => ['All', ...new Set(products.map((item) => item.category))], [products])
 
   const visibleProducts = useMemo(() => {
@@ -130,6 +141,7 @@ export default function ShopPage() {
             <button
               type="button"
               onClick={() => {
+                navigate('/shop')
                 setCategory('All')
                 setSearch('')
               }}

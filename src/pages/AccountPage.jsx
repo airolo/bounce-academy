@@ -13,6 +13,7 @@ export default function AccountPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const [orders, setOrders] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const activeOrders = orders.filter((order) => String(order.status).toLowerCase() !== 'delivered')
   const deliveredOrders = orders.filter((order) => String(order.status).toLowerCase() === 'delivered')
@@ -21,11 +22,14 @@ export default function AccountPage() {
     async function loadOrders() {
       if (!user) return
 
+      setIsLoading(true)
       try {
         const rows = await getOrdersByUser(user.id)
         setOrders(rows)
       } catch (error) {
         console.error(error)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -83,95 +87,149 @@ export default function AccountPage() {
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">Orders</h2>
 
-          {activeOrders.length === 0 ? <div className="card text-sm text-gray-600">No active orders.</div> : null}
-
-          {activeOrders.map((order) => (
-            <article key={order.id} className="card">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm text-gray-600">{formatDate(order.created_at)}</p>
-                <StatusBadge status={order.status} />
-              </div>
-              <p className="mt-2 text-sm font-medium">Total: {formatCurrency(order.total_price)}</p>
-
-              <div className="mt-3 space-y-2 border-t border-gray-200 pt-3">
-                {order.order_items?.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between gap-3 text-sm">
-                    <div className="flex items-center gap-3">
-                      <SmartImage
-                        src={item.products?.image_url}
-                        alt={item.products?.name ?? 'Product image'}
-                        className="h-12 w-12 rounded-lg border border-gray-200 object-cover"
-                        loading="lazy"
-                      />
-                      <div>
-                        <span>{item.products?.name ?? 'Product'} x{item.quantity}</span>
-                        {(item.size || item.color) ? (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {item.size ? <span className="rounded-full border border-gray-300 px-2 py-0.5 text-[11px] text-gray-700">Size: {item.size}</span> : null}
-                            {item.color ? <span className="rounded-full border border-gray-300 px-2 py-0.5 text-[11px] text-gray-700">Color: {item.color}</span> : null}
-                          </div>
-                        ) : null}
-                      </div>
-                    </div>
-                    <span>{formatCurrency(item.price * item.quantity)}</span>
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 2 }).map((_, index) => (
+                <article key={`active-order-skeleton-${index}`} className="card space-y-3">
+                  <div className="h-4 w-32 rounded-full bg-gray-200" />
+                  <div className="h-5 w-24 rounded-full bg-gray-200" />
+                  <div className="space-y-2 border-t border-gray-200 pt-3">
+                    <div className="h-12 w-full rounded-xl bg-gray-100" />
+                    <div className="h-12 w-full rounded-xl bg-gray-100" />
                   </div>
-                ))}
-              </div>
-            </article>
-          ))}
+                </article>
+              ))}
+            </div>
+          ) : activeOrders.length === 0 ? (
+            <div className="card border-dashed border-gray-300 bg-gray-50 text-sm text-gray-600">
+              <p className="font-medium text-black">No active orders yet.</p>
+              <p className="mt-1">Your open orders will appear here while they are being processed or shipped.</p>
+            </div>
+          ) : (
+            activeOrders.map((order) => (
+              <article key={order.id} className="card">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm text-gray-600">{formatDate(order.created_at)}</p>
+                  <StatusBadge status={order.status} />
+                </div>
+                <p className="mt-2 text-sm font-medium">Total: {formatCurrency(order.total_price)}</p>
+
+                <div className="mt-3 space-y-2 border-t border-gray-200 pt-3">
+                  {order.order_items?.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between gap-3 text-sm">
+                      <div className="flex items-center gap-3">
+                        <SmartImage
+                          src={item.products?.image_url}
+                          alt={item.products?.name ?? 'Product image'}
+                          className="h-12 w-12 rounded-lg border border-gray-200 object-cover"
+                          loading="lazy"
+                        />
+                        <div>
+                          <span>
+                            {item.products?.name ?? 'Product'} x{item.quantity}
+                          </span>
+                          {(item.size || item.color) ? (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {item.size ? (
+                                <span className="rounded-full border border-gray-300 px-2 py-0.5 text-[11px] text-gray-700">
+                                  Size: {item.size}
+                                </span>
+                              ) : null}
+                              {item.color ? (
+                                <span className="rounded-full border border-gray-300 px-2 py-0.5 text-[11px] text-gray-700">
+                                  Color: {item.color}
+                                </span>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                      <span>{formatCurrency(item.price * item.quantity)}</span>
+                    </div>
+                  ))}
+                </div>
+              </article>
+            ))
+          )}
         </section>
 
         <section className="space-y-3">
           <h2 className="text-xl font-semibold">Order History</h2>
 
-          {deliveredOrders.length === 0 ? (
-            <div className="card text-sm text-gray-600">No delivered orders yet.</div>
-          ) : null}
+          {isLoading ? (
+            <div className="space-y-3">
+              {Array.from({ length: 2 }).map((_, index) => (
+                <article key={`history-skeleton-${index}`} className="card space-y-3">
+                  <div className="h-4 w-36 rounded-full bg-gray-200" />
+                  <div className="h-5 w-24 rounded-full bg-gray-200" />
+                  <div className="space-y-2 border-t border-gray-200 pt-3">
+                    <div className="h-12 w-full rounded-xl bg-gray-100" />
+                    <div className="h-12 w-full rounded-xl bg-gray-100" />
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : deliveredOrders.length === 0 ? (
+            <div className="card border-dashed border-gray-300 bg-gray-50 text-sm text-gray-600">
+              <p className="font-medium text-black">No delivered orders yet.</p>
+              <p className="mt-1">Completed orders will move here after they reach delivered status.</p>
+            </div>
+          ) : (
+            deliveredOrders.map((order) => (
+              <article key={order.id} className="card">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm text-gray-600">Delivered on {formatDate(order.created_at)}</p>
+                  <StatusBadge status={order.status} />
+                </div>
+                <p className="mt-2 text-sm font-medium">Total: {formatCurrency(order.total_price)}</p>
 
-          {deliveredOrders.map((order) => (
-            <article key={order.id} className="card">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="text-sm text-gray-600">Delivered on {formatDate(order.created_at)}</p>
-                <StatusBadge status={order.status} />
-              </div>
-              <p className="mt-2 text-sm font-medium">Total: {formatCurrency(order.total_price)}</p>
+                <div className="mt-3 space-y-2 border-t border-gray-200 pt-3">
+                  {order.order_items?.map((item) => (
+                    <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 text-sm">
+                      <div className="flex items-center gap-3">
+                        <SmartImage
+                          src={item.products?.image_url}
+                          alt={item.products?.name ?? 'Product image'}
+                          className="h-12 w-12 rounded-lg border border-gray-200 object-cover"
+                          loading="lazy"
+                        />
+                        <div>
+                          <span>
+                            {item.products?.name ?? 'Product'} x{item.quantity}
+                          </span>
+                          {(item.size || item.color) ? (
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {item.size ? (
+                                <span className="rounded-full border border-gray-300 px-2 py-0.5 text-[11px] text-gray-700">
+                                  Size: {item.size}
+                                </span>
+                              ) : null}
+                              {item.color ? (
+                                <span className="rounded-full border border-gray-300 px-2 py-0.5 text-[11px] text-gray-700">
+                                  Color: {item.color}
+                                </span>
+                              ) : null}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
 
-              <div className="mt-3 space-y-2 border-t border-gray-200 pt-3">
-                {order.order_items?.map((item) => (
-                  <div key={item.id} className="flex flex-wrap items-center justify-between gap-3 text-sm">
-                    <div className="flex items-center gap-3">
-                      <SmartImage
-                        src={item.products?.image_url}
-                        alt={item.products?.name ?? 'Product image'}
-                        className="h-12 w-12 rounded-lg border border-gray-200 object-cover"
-                        loading="lazy"
-                      />
-                      <div>
-                        <span>{item.products?.name ?? 'Product'} x{item.quantity}</span>
-                        {(item.size || item.color) ? (
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {item.size ? <span className="rounded-full border border-gray-300 px-2 py-0.5 text-[11px] text-gray-700">Size: {item.size}</span> : null}
-                            {item.color ? <span className="rounded-full border border-gray-300 px-2 py-0.5 text-[11px] text-gray-700">Color: {item.color}</span> : null}
-                          </div>
-                        ) : null}
+                      <div className="flex items-center gap-2">
+                        <span>{formatCurrency(item.price * item.quantity)}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleOrderAgain(item)}
+                          className="button-secondary px-3 py-1.5 text-xs"
+                        >
+                          Order Again
+                        </button>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2">
-                      <span>{formatCurrency(item.price * item.quantity)}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleOrderAgain(item)}
-                        className="button-secondary px-3 py-1.5 text-xs"
-                      >
-                        Order Again
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </article>
-          ))}
+                  ))}
+                </div>
+              </article>
+            ))
+          )}
         </section>
       </div>
     </div>

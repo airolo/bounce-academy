@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { FiShoppingBag } from 'react-icons/fi'
 import QuantityControl from '../components/ui/QuantityControl.jsx'
 import SmartImage from '../components/ui/SmartImage.jsx'
 import { useCart } from '../contexts/CartContext.jsx'
@@ -97,8 +98,19 @@ export default function CartPage() {
       <h1 className="text-3xl font-semibold tracking-tight">Cart</h1>
 
       {items.length === 0 ? (
-        <div className="card text-sm text-gray-600">
-          Your cart is empty. <Link to="/shop" className="underline">Continue shopping</Link>
+        <div className="card border-dashed border-gray-300 bg-gray-50 text-sm text-gray-600">
+          <div className="flex items-start gap-3">
+            <div className="rounded-2xl bg-white p-3 text-black shadow-sm">
+              <FiShoppingBag className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="font-medium text-black">Your cart is empty.</p>
+              <p className="mt-1">Add a few pieces from the shop to start building your order.</p>
+              <Link to="/shop" className="button-secondary mt-4 inline-flex">
+                Continue shopping
+              </Link>
+            </div>
+          </div>
         </div>
       ) : (
         <div className="grid gap-5 lg:grid-cols-[1fr_320px]">

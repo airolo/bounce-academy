@@ -47,6 +47,7 @@ const initialForm = {
 
 export default function AdminProductsPage() {
   const [products, setProducts] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [stockFilter, setStockFilter] = useState('All')
@@ -63,8 +64,13 @@ export default function AdminProductsPage() {
   const [colorImagePreviews, setColorImagePreviews] = useState({})
 
   async function loadProducts() {
-    const rows = await getProducts()
-    setProducts(rows)
+    setIsLoading(true)
+    try {
+      const rows = await getProducts()
+      setProducts(rows)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -572,7 +578,81 @@ export default function AdminProductsPage() {
         </div>
       ) : null}
 
-      <div className="card overflow-hidden p-0">
+      {isLoading ? (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div key={`product-skeleton-${index}`} className="card space-y-3">
+              <div className="h-4 w-24 rounded-full bg-gray-200" />
+              <div className="h-5 w-3/4 rounded-full bg-gray-200" />
+              <div className="h-4 w-full rounded-full bg-gray-200" />
+              <div className="h-4 w-5/6 rounded-full bg-gray-200" />
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <div className="h-10 rounded-xl bg-gray-200" />
+                <div className="h-10 rounded-xl bg-gray-200" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : visibleProducts.length === 0 ? (
+        <div className="card border-dashed border-gray-300 bg-gray-50 text-sm text-gray-600">
+          <p className="font-medium text-black">No products match the current filters.</p>
+          <p className="mt-1">Try clearing search, category, or stock filters to see the full catalog.</p>
+        </div>
+      ) : (
+        <div className="grid gap-4 lg:hidden">
+          {visibleProducts.map((product) => (
+            <article key={product.id} className="card space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-500">{product.category}</p>
+                  <h3 className="mt-1 text-lg font-semibold leading-tight">{product.name}</h3>
+                </div>
+                <span
+                  className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                    product.is_featured ? 'bg-black text-white' : 'bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  {product.is_featured ? 'Featured' : 'Regular'}
+                </span>
+              </div>
+
+              <p className="line-clamp-3 text-sm text-gray-600">{product.description || 'No description provided.'}</p>
+
+              <div className="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                <div className="rounded-xl bg-gray-50 px-3 py-2">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Price</p>
+                  <p className="mt-1 font-semibold">{formatCurrency(product.price)}</p>
+                </div>
+                <div className="rounded-xl bg-gray-50 px-3 py-2">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Stock</p>
+                  <p className="mt-1 font-semibold">{product.stock}</p>
+                </div>
+                <div className="rounded-xl bg-gray-50 px-3 py-2">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Sizes</p>
+                  <p className="mt-1 text-sm">{Array.isArray(product.sizes) ? product.sizes.join(', ') : '-'}</p>
+                </div>
+                <div className="rounded-xl bg-gray-50 px-3 py-2">
+                  <p className="text-xs uppercase tracking-wide text-gray-500">Colors</p>
+                  <p className="mt-1 text-sm">
+                    {Array.isArray(product.colors) && product.colors.length > 0 ? product.colors.join(', ') : '-'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <button type="button" className="button-secondary flex-1" onClick={() => handleEdit(product)}>
+                  Edit
+                </button>
+                <button type="button" className="button-secondary flex-1" onClick={() => openDeleteModal(product)}>
+                  Delete
+                </button>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      <div className="card hidden overflow-hidden p-0 lg:block">
         <div className="border-b border-gray-200 px-4 py-3 text-sm text-gray-600">
           Showing {visibleProducts.length} product{visibleProducts.length === 1 ? '' : 's'}
           {search.trim() ? ` matching “${search.trim()}”` : ''}
