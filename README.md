@@ -1,16 +1,44 @@
-# React + Vite
+# Bounce Academy
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Bounce Academy is a React + Vite ecommerce storefront for basketball-inspired apparel and accessories. It includes a public shop experience, customer accounts, wishlist and cart flows, checkout, product reviews, and an admin area for managing products, orders, and users.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Modern storefront homepage with featured products and category browsing
+- Product catalog with search, sort, wishlist, and cart actions
+- Product detail pages with size, color, and review support
+- Customer account page with order history and reorder actions
+- Admin dashboard for sales, inventory, and order insights
+- Admin product and user management screens
+- Floating assistant chatbot for common shop questions
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React
+- React Router
+- Tailwind CSS
+- Supabase
+- Vite
 
-## Expanding the ESLint configuration
+## Project Notes
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- The app uses Supabase for authentication and database storage.
+- Cart and order actions are connected to product stock updates.
+- The design favors a clean, minimal black-and-white style with subtle motion.
+
+## Development
+
+```bash
+npm install
+npm run dev
+```
+
+## Build
+
+```bash
+npm run build
+```
+
+## License
+
+Private project for Bounce Academy.

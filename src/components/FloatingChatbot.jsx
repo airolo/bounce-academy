@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { FiMessageCircle, FiX } from 'react-icons/fi'
+import { FiArrowRight, FiMessageCircle, FiX } from 'react-icons/fi'
 
 const faq = [
   {
@@ -53,16 +53,22 @@ export default function FloatingChatbot() {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      text: `Hi, I can help with Bounce Academy shopping questions. If you need something else, contact us at ${ownerContact.email} or ${ownerContact.phone}.`,
+      text: `Hi I'm Bouncey, I can help with the shopping questions. If you need something else, contact us at ${ownerContact.email} or ${ownerContact.phone}.`,
     },
   ])
   const [messageInput, setMessageInput] = useState('')
-  const messagesEndRef = useRef(null)
+  const messagesContainerRef = useRef(null)
 
   useEffect(() => {
     if (!isOpen) return
 
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const container = messagesContainerRef.current
+    if (!container) return
+
+    container.scrollTo({
+      top: container.scrollHeight,
+      behavior: 'smooth',
+    })
   }, [isOpen, messages])
 
   function pushAssistantMessage(text) {
@@ -89,77 +95,112 @@ export default function FloatingChatbot() {
   }
 
   return (
-    <div className="fixed bottom-5 right-5 z-40">
+    <div className="fixed bottom-4 right-4 z-40 sm:bottom-5 sm:right-5">
       {isOpen ? (
-        <div className="mb-3 flex h-[28rem] w-[20rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white/95 p-3 shadow-soft backdrop-blur">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-sm font-semibold tracking-tight">Bounce Assistant</h3>
-            <button
-              type="button"
-              onClick={() => setIsOpen(false)}
-              className="rounded-full border border-gray-200 p-1.5 text-gray-500 transition hover:border-black hover:text-black"
-              aria-label="Close assistant"
-            >
-              <FiX />
-            </button>
-          </div>
+        <div className="chatbot-panel mb-3 flex h-[26rem] min-h-0 w-[22rem] max-w-[calc(100vw-1.5rem)] flex-col overflow-hidden rounded-[1.75rem] border border-gray-200 bg-white text-black shadow-[0_24px_70px_rgba(0,0,0,0.16)] sm:h-[30rem] sm:w-[24rem]">
+          <div className="relative overflow-hidden border-b border-gray-200 bg-white px-4 py-4">
+            <div className="absolute -left-8 -top-8 h-24 w-24 rounded-full bg-black/5 blur-3xl" />
+            <div className="absolute -bottom-8 right-0 h-24 w-24 rounded-full bg-black/5 blur-3xl" />
 
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            {faq.map((item) => (
+            <div className="relative flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-black text-white shadow-lg">
+                  <FiMessageCircle className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold tracking-tight text-black">Bouncey</p>
+                </div>
+              </div>
+
               <button
-                key={item.question}
                 type="button"
-                onClick={() => handleQuestionSelect(item.question)}
-                className={`rounded-full border px-2.5 py-1 text-[11px] transition ${
-                  activeQuestion === item.question
-                    ? 'border-black bg-black text-white'
-                    : 'border-gray-200 bg-white text-gray-700 hover:border-black hover:text-black'
-                }`}
+                onClick={() => setIsOpen(false)}
+                className="inline-flex rounded-full border border-gray-200 bg-white p-2 text-gray-600 transition hover:border-gray-300 hover:bg-gray-50 hover:text-black"
+                aria-label="Close assistant"
               >
-                {item.question}
+                <FiX className="h-4 w-4" />
               </button>
-            ))}
+            </div>
           </div>
 
-          <div className="mb-3 flex-1 space-y-2.5 overflow-y-auto pr-1">
+          <div ref={messagesContainerRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto bg-gray-50 px-4 py-4">
             {messages.map((message, index) => (
               <div key={`${message.role}-${index}`} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div
-                  className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
-                    message.role === 'user' ? 'bg-black text-white' : 'bg-gray-100 text-gray-700'
+                  className={`max-w-[88%] rounded-[1.15rem] px-3.5 py-2.5 text-sm leading-relaxed shadow-sm ${
+                    message.role === 'user'
+                      ? 'bg-black text-white'
+                      : 'border border-gray-200 bg-white text-gray-800'
                   }`}
                 >
                   {message.text}
                 </div>
               </div>
             ))}
-            <div ref={messagesEndRef} />
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-2">
-            <input
-              type="text"
-              value={messageInput}
-              onChange={(event) => setMessageInput(event.target.value)}
-              placeholder="Ask about shipping, orders, returns..."
-              className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none transition focus:border-black"
-            />
-            <div className="flex items-center justify-between gap-2">
-              <button type="submit" className="button-primary px-3 py-2 text-xs">
-                Send
-              </button>
-              <p className="text-[11px] text-gray-500">Shop FAQs only. Other topics show contact details.</p>
-            </div>
-          </form>
+          <div className="shrink-0 border-t border-gray-200 bg-white px-4 py-4">
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {faq.map((item) => (
+                  <button
+                    key={item.question}
+                    type="button"
+                    onClick={() => handleQuestionSelect(item.question)}
+                    className={`rounded-full border px-3 py-1.5 text-[11px] font-medium transition ${
+                      activeQuestion === item.question
+                        ? 'border-black bg-black text-white'
+                        : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50 hover:text-black'
+                    }`}
+                  >
+                    {item.question}
+                  </button>
+                ))}
+              </div>
+
+              <label className="block">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={messageInput}
+                    onChange={(event) => setMessageInput(event.target.value)}
+                    placeholder="Ask about shipping, orders, returns..."
+                    className="min-w-0 flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-black placeholder:text-gray-400 outline-none transition focus:border-black"
+                  />
+
+                  <button
+                    type="submit"
+                    className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-200 bg-white text-black transition hover:border-black hover:bg-gray-50"
+                    aria-label="Send message"
+                  >
+                    <FiArrowRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </label>
+            </form>
+          </div>
         </div>
       ) : null}
 
       <button
         type="button"
         onClick={() => setIsOpen((prev) => !prev)}
-        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black bg-black text-white shadow-soft transition hover:translate-y-[-1px]"
+        className={`group relative inline-flex h-12 w-12 items-center justify-center rounded-full border border-black bg-black text-white shadow-[0_14px_35px_rgba(0,0,0,0.28)] transition hover:translate-y-[-1px] hover:bg-gray-900 ${
+          isOpen ? 'shadow-[0_18px_40px_rgba(0,0,0,0.34)]' : ''
+        }`}
+        aria-label="Open chat assistant"
+        aria-expanded={isOpen}
       >
-        <FiMessageCircle className="h-5 w-5" />
+        <span
+          className={`absolute inset-0 rounded-full bg-white/20 transition-opacity duration-300 ${
+            isOpen ? 'opacity-100 animate-pulse' : 'opacity-0 group-hover:opacity-100'
+          }`}
+        />
+        <FiMessageCircle
+          className={`relative h-5 w-5 transition-transform duration-300 ease-out ${
+            isOpen ? 'scale-110 rotate-12' : 'scale-100 rotate-0 group-hover:scale-110'
+          }`}
+        />
       </button>
     </div>
   )
