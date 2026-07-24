@@ -41,7 +41,7 @@ export default function AdminOrdersPage() {
 
     const filtered = orders.filter((order) => {
       const shipping = order.shipping_details ?? {}
-      const customerName = String(order.profiles?.full_name ?? order.profiles?.email ?? 'Unknown customer').toLowerCase()
+      const customerName = String(order.profile?.full_name ?? order.profile?.email ?? 'Unknown customer').toLowerCase()
       const address = String(shipping.address ?? '').toLowerCase()
       const contact = String(shipping.contactNumber ?? '').toLowerCase()
       const orderItemsText = (order.order_items ?? [])
@@ -68,8 +68,13 @@ export default function AdminOrdersPage() {
   }, [orders, search, statusFilter, sortBy])
 
   async function handleChangeStatus(id, status) {
-    await updateOrderStatus(id, status)
-    loadOrders().catch(console.error)
+    try {
+      await updateOrderStatus(id, status)
+      await loadOrders()
+    } catch (error) {
+      console.error(error)
+      alert(error.message)
+    }
   }
 
   return (
@@ -181,7 +186,7 @@ export default function AdminOrdersPage() {
                       Order #{order.id} · {formatDate(order.created_at)}
                     </p>
                     <p className="text-sm font-medium">
-                      Customer: {order.profiles?.full_name ?? order.profiles?.email ?? 'Unknown'}
+                      Customer: {order.profile?.full_name ?? order.profile?.email ?? 'Unknown'}
                     </p>
                     <p className="text-sm text-gray-700">Address: {address || 'No address provided'}</p>
                     <p className="text-sm text-gray-700">Contact: {contactNumber || 'No contact number provided'}</p>

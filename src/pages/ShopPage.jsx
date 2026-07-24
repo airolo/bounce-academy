@@ -87,9 +87,14 @@ export default function ShopPage() {
   async function handleToggleWishlist(productId) {
     if (!user) return
 
-    const exists = wishlistIds.includes(productId)
-    await toggleWishlistItem({ userId: user.id, productId, exists })
-    setWishlistIds((prev) => (exists ? prev.filter((id) => id !== productId) : [...prev, productId]))
+    try {
+      const exists = wishlistIds.includes(productId)
+      await toggleWishlistItem({ userId: user.id, productId, exists })
+      setWishlistIds((prev) => (exists ? prev.filter((id) => id !== productId) : [...prev, productId]))
+    } catch (error) {
+      console.error(error)
+      alert(error.message)
+    }
   }
 
   async function handleAddToCart(product) {

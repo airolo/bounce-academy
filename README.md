@@ -14,22 +14,35 @@ Bounce Academy is a React + Vite ecommerce storefront for basketball-inspired ap
 
 ## Tech Stack
 
-- React
-- React Router
-- Tailwind CSS
-- Supabase
-- Vite
+- React 19
+- React Router DOM 7
+- Tailwind CSS 3
+- Supabase (PostgreSQL, Auth)
+- Vite 8
+- react-icons (Feather)
 
-## Project Notes
+## Prerequisites
 
-- The app uses Supabase for authentication and database storage.
-- Cart and order actions are connected to product stock updates.
-- The design favors a clean, minimal black-and-white style with subtle motion.
+- Node.js 18+
+- A Supabase project (free tier works)
+
+## Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Create environment file
+# Copy the values from your Supabase project dashboard
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+The Supabase schema is in `supabase/schema.sql` — run it in your Supabase SQL editor to set up the database.
 
 ## Development
 
 ```bash
-npm install
 npm run dev
 ```
 
@@ -37,7 +50,25 @@ npm run dev
 
 ```bash
 npm run build
+npm run preview
 ```
+
+## Admin Access
+
+1. Register a user through the `/auth` page
+2. In your Supabase SQL editor, run:
+   ```sql
+   UPDATE profiles SET role = 'admin' WHERE email = 'your-email@example.com';
+   ```
+3. Log in — admin navigation appears automatically
+
+## Project Notes
+
+- The app uses Supabase for authentication and database storage.
+- Cart and order actions are connected to product stock updates via the `adjust_product_stock` RPC.
+- Checkout is Cash on Delivery (COD) only — enforced at the database level.
+- The design favors a clean, minimal black-and-white style with subtle motion.
+- No test framework is configured.
 
 ## License
 

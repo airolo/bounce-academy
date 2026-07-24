@@ -329,7 +329,7 @@ export default function AdminDashboardPage() {
                     <span className="text-xs capitalize text-gray-600">{order.status}</span>
                   </div>
                   <p className="mt-1 text-xs text-gray-500">
-                    {order.profiles?.full_name ?? order.profiles?.email ?? 'Unknown customer'}
+                    {order.profile?.full_name ?? order.profile?.email ?? 'Unknown customer'}
                   </p>
                   <div className="mt-1 flex items-center justify-between text-xs text-gray-500">
                     <span>{formatDate(order.created_at)}</span>

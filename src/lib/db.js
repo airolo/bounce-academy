@@ -180,7 +180,7 @@ export async function getAllOrders() {
 
   return orders.map((order) => ({
     ...order,
-    profiles: profileById.get(order.user_id) ?? null,
+    profile: profileById.get(order.user_id) ?? null,
   }))
 }
 

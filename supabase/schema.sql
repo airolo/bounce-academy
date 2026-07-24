@@ -267,3 +267,14 @@ for select using (public.is_admin());
 
 create policy "profiles_admin_update" on public.profiles
 for update using (public.is_admin()) with check (public.is_admin());
+
+create index if not exists idx_profiles_role on public.profiles(role);
+create index if not exists idx_products_category on public.products(category);
+create index if not exists idx_products_is_featured on public.products(is_featured);
+create index if not exists idx_products_search on public.products using gin(to_tsvector('english', name || ' ' || description));
+create index if not exists idx_orders_user_id on public.orders(user_id);
+create index if not exists idx_orders_status on public.orders(status);
+create index if not exists idx_orders_created_at on public.orders(created_at desc);
+create index if not exists idx_order_items_order_id on public.order_items(order_id);
+create index if not exists idx_order_items_product_id on public.order_items(product_id);
+create index if not exists idx_product_reviews_product_id on public.product_reviews(product_id);

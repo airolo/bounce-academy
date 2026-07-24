@@ -32,8 +32,13 @@ export default function WishlistPage() {
   async function handleToggle(productId) {
     if (!user) return
 
-    await toggleWishlistItem({ userId: user.id, productId, exists: true })
-    setRows((prev) => prev.filter((item) => item.product_id !== productId))
+    try {
+      await toggleWishlistItem({ userId: user.id, productId, exists: true })
+      setRows((prev) => prev.filter((item) => item.product_id !== productId))
+    } catch (error) {
+      console.error(error)
+      alert(error.message)
+    }
   }
 
   return (

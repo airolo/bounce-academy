@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, useCallback, useRef } from 'react'
 import { releaseProductStock, reserveProductStock } from '../lib/db.js'
 import { useAuth } from './AuthContext.jsx'
 
@@ -9,11 +9,41 @@ export function CartProvider({ children }) {
   const [items, setItems] = useState([])
 
   const storageKey = useMemo(() => `bounce_cart_${user?.id ?? 'guest'}`, [user?.id])
+  const prevUserId = useRef(user?.id)
 
   useEffect(() => {
     const raw = localStorage.getItem(storageKey)
     setItems(raw ? JSON.parse(raw) : [])
   }, [storageKey])
+
+  useEffect(() => {
+    if (!user?.id || prevUserId.current) {
+      prevUserId.current = user?.id
+      return
+    }
+
+    prevUserId.current = user?.id
+
+    const guestKey = 'bounce_cart_guest'
+    const guestRaw = localStorage.getItem(guestKey)
+    if (!guestRaw) return
+
+    try {
+      const guestItems = JSON.parse(guestRaw)
+      if (!Array.isArray(guestItems) || guestItems.length === 0) return
+
+      const userRaw = localStorage.getItem(storageKey)
+      const userItems = userRaw ? JSON.parse(userRaw) : []
+      const existingKeys = new Set(userItems.map((i) => i.cartKey))
+
+      const merged = [...userItems, ...guestItems.filter((i) => !existingKeys.has(i.cartKey))]
+      localStorage.setItem(storageKey, JSON.stringify(merged))
+      localStorage.removeItem(guestKey)
+      setItems(merged)
+    } catch {
+      // ignore parse errors
+    }
+  }, [user?.id, storageKey])
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(items))
@@ -112,10 +142,22 @@ export function CartProvider({ children }) {
     [items, safeReleaseStock],
   )
 
-  const removeItemsByKeys = useCallback((cartKeys) => {
-    const keySet = new Set(cartKeys)
-    setItems((prev) => prev.filter((item) => !keySet.has(item.cartKey)))
-  }, [])
+  const removeItemsByKeys = useCallback(
+    async (cartKeys) => {
+      const keySet = new Set(cartKeys)
+      const removed = items.filter((item) => keySet.has(item.cartKey))
+
+      const releaseResults = await Promise.all(
+        removed.map((item) => safeReleaseStock(item.id, item.quantity)),
+      )
+      if (releaseResults.some((released) => !released)) {
+        throw new Error('Unable to release stock for removed items.')
+      }
+
+      setItems((prev) => prev.filter((item) => !keySet.has(item.cartKey)))
+    },
+    [items, safeReleaseStock],
+  )
 
   const updateItemVariant = useCallback(
     async (oldCartKey, newSize, newColor) => {
@@ -123,8 +165,18 @@ export function CartProvider({ children }) {
       if (!targetItem) return
 
       const newCartKey = `${targetItem.id}::${newSize ?? 'NOSIZE'}::${newColor ?? 'NOCOLOR'}`
-
       if (newCartKey === oldCartKey) return
+
+      const released = await safeReleaseStock(targetItem.id, targetItem.quantity)
+      if (!released) {
+        throw new Error('Unable to release stock for the old variant.')
+      }
+
+      const reserved = await safeReserveStock(targetItem.id, targetItem.quantity)
+      if (!reserved) {
+        await safeReserveStock(targetItem.id, targetItem.quantity)
+        throw new Error('Not enough stock available for this variant.')
+      }
 
       setItems((prev) => {
         const filtered = prev.filter((item) => item.cartKey !== oldCartKey)
@@ -132,14 +184,16 @@ export function CartProvider({ children }) {
 
         if (existing) {
           return filtered.map((item) =>
-            item.cartKey === newCartKey ? { ...item, quantity: item.quantity + targetItem.quantity } : item,
+            item.cartKey === newCartKey
+              ? { ...item, quantity: item.quantity + targetItem.quantity }
+              : item,
           )
         }
 
         return [...filtered, { ...targetItem, cartKey: newCartKey, size: newSize, color: newColor }]
       })
     },
-    [items],
+    [items, safeReleaseStock, safeReserveStock],
   )
 
   const clearCart = useCallback(async () => {

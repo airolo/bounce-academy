@@ -10,7 +10,7 @@ export default function StatusBadge({ status = 'pending' }) {
   const style = statusStyle[key] ?? statusStyle.pending
 
   return (
-    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium capitalize ${style}`}>
+    <span className={`inline-flex rounded-full border px-3 py-1 text-xs font-medium capitalize ${style}`} aria-label={`Status: ${key}`}>
       {key}
     </span>
   )

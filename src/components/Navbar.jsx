@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { FiHeart, FiMenu, FiShoppingCart, FiUser, FiX } from 'react-icons/fi'
 import { useCart } from '../contexts/CartContext.jsx'
@@ -25,6 +25,17 @@ export default function Navbar() {
   function closeMobileMenu() {
     setIsMobileMenuOpen(false)
   }
+
+  useEffect(() => {
+    if (!isMobileMenuOpen) return
+
+    function onKeyDown(event) {
+      if (event.key === 'Escape') closeMobileMenu()
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isMobileMenuOpen])
 
   return (
     <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur">
@@ -74,10 +85,8 @@ export default function Navbar() {
 
       {isMobileMenuOpen ? (
         <div className="fixed inset-0 z-40 md:hidden">
-          <button
-            type="button"
+          <div
             className="absolute inset-0 bg-black/40"
-            aria-label="Close menu overlay"
             onClick={closeMobileMenu}
           />
 

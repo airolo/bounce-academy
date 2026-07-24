@@ -23,6 +23,7 @@ export default function ProductCard({ product, isWishlisted, onToggleWishlist, o
         ) : null}
         <button
           type="button"
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
           onClick={() => onToggleWishlist?.(product.id)}
           className="absolute right-3 top-3 rounded-full border border-gray-300 bg-white p-2"
         >
@@ -33,8 +34,8 @@ export default function ProductCard({ product, isWishlisted, onToggleWishlist, o
       <div className="flex flex-1 flex-col gap-2">
         <p className="text-xs uppercase tracking-wide text-gray-500">{product.category}</p>
         <h3 className="text-base font-semibold leading-tight text-black">{product.name}</h3>
-        <p className={`text-sm ${isLowStock ? 'font-medium text-amber-700' : 'text-gray-600'}`}>
-          {isLowStock ? `Low stock: ${product.stock}` : `In stock: ${product.stock}`}
+        <p className={`text-sm ${Number(product.stock) <= 0 ? 'font-medium text-red-600' : isLowStock ? 'font-medium text-amber-700' : 'text-gray-600'}`}>
+          {Number(product.stock) <= 0 ? 'Out of stock' : isLowStock ? `Low stock: ${product.stock}` : `In stock: ${product.stock}`}
         </p>
         <p className="text-xs text-gray-600">Sizes: {sizes.length > 0 ? sizes.join(', ') : 'N/A'}</p>
         <p className="mt-auto text-lg font-semibold">{formatCurrency(product.price)}</p>
@@ -42,7 +43,7 @@ export default function ProductCard({ product, isWishlisted, onToggleWishlist, o
 
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button type="button" className="button-primary" onClick={() => onAddToCart(product)}>
-          Add
+          Add to cart
         </button>
         <Link to={`/product/${product.id}`} className="button-secondary text-center">
           View

@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { FiChevronLeft, FiChevronRight, FiX } from 'react-icons/fi'
-import { FiFacebook, FiInstagram, FiMail, FiPhone } from 'react-icons/fi'
 import SectionHeading from '../components/ui/SectionHeading.jsx'
+import Footer from '../components/Footer.jsx'
 
 const storyHighlights = [
   {
@@ -41,8 +40,19 @@ export default function AboutPage() {
   const [galleryPage, setGalleryPage] = useState(0)
   const [selectedImage, setSelectedImage] = useState(null)
   const [aboutImageIndex, setAboutImageIndex] = useState(0)
+  const [heroLoaded, setHeroLoaded] = useState(false)
+  const [loadedImages, setLoadedImages] = useState(new Set())
   const touchStartX = useRef(null)
   const aboutTouchStartX = useRef(null)
+
+  const markImageLoaded = (src) => {
+    setLoadedImages((prev) => {
+      if (prev.has(src)) return prev
+      const next = new Set(prev)
+      next.add(src)
+      return next
+    })
+  }
 
   const galleryPageCount = Math.ceil(trainingGallery.length / galleryPageSize)
   const canPaginateGallery = galleryPageCount > 1
@@ -149,12 +159,14 @@ export default function AboutPage() {
             onTouchStart={handleAboutTouchStart}
             onTouchEnd={handleAboutTouchEnd}
           >
+            {!heroLoaded ? <div className="absolute inset-0 skeleton-shimmer" /> : null}
             <img
               src={aboutImages[aboutImageIndex]}
               alt="Bounce Academy training"
               loading="eager"
               decoding="async"
-              className="absolute inset-0 h-full w-full object-cover"
+              className={`absolute inset-0 h-full w-full object-cover ${heroLoaded ? '' : 'opacity-0'}`}
+              onLoad={() => setHeroLoaded(true)}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent" />
 
@@ -231,7 +243,7 @@ export default function AboutPage() {
           {visibleGalleryItems.map((item, index) => (
             <figure
               key={item.src}
-              className={`group relative overflow-hidden rounded-2xl border border-gray-200 ${
+              className={`group relative overflow-hidden rounded-2xl border border-gray-200 bg-gray-100 ${
                 index % 5 === 0 ? 'col-span-2 row-span-2' : ''
               }`}
               role="button"
@@ -244,12 +256,14 @@ export default function AboutPage() {
                 }
               }}
             >
+              {!loadedImages.has(item.src) ? <div className="absolute inset-0 skeleton-shimmer" /> : null}
               <img
                 src={item.src}
                 alt={item.title}
                 loading="lazy"
                 decoding="async"
-                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                className={`h-full w-full object-cover transition duration-500 group-hover:scale-105 ${loadedImages.has(item.src) ? '' : 'opacity-0'}`}
+                onLoad={() => markImageLoaded(item.src)}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/25 to-transparent" />
               <figcaption className="absolute inset-x-0 bottom-0 p-3 text-white">
@@ -304,85 +318,7 @@ export default function AboutPage() {
         </div>
       ) : null}
 
-      <footer className="overflow-hidden rounded-3xl border border-black bg-black px-6 py-10 text-white sm:px-8">
-        <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:items-start">
-          <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-white/60">Bounce Academy</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Movement-ready essentials for every day.
-            </h2>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white/60">Explore</h3>
-            <div className="mt-4 flex flex-col gap-3 text-sm text-white/80">
-              <Link to="/shop" className="transition hover:text-white">
-                Shop all products
-              </Link>
-              <Link to="/wishlist" className="transition hover:text-white">
-                Saved items
-              </Link>
-              <Link to="/cart" className="transition hover:text-white">
-                Cart
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white/60">Account</h3>
-            <div className="mt-4 flex flex-col gap-3 text-sm text-white/80">
-              <Link to="/auth" className="transition hover:text-white">
-                Sign in
-              </Link>
-              <Link to="/account" className="transition hover:text-white">
-                My account
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white/60">Connect</h3>
-            <div className="mt-4 flex flex-col gap-3 text-sm text-white/80">
-              <a href="mailto:info@bounceacademy.com" className="inline-flex items-center gap-2 transition hover:text-white">
-                <FiMail size={16} />
-                info@bounceacademy.com
-              </a>
-              <a href="tel:+1234567890" className="inline-flex items-center gap-2 transition hover:text-white">
-                <FiPhone size={16} />
-                0927 437 2354
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 border-t border-white/10 pt-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-white/50">© {new Date().getFullYear()} Bounce Academy. All rights reserved.</p>
-            </div>
-            <div className="flex gap-4 sm:gap-5">
-              <a
-                href="https://www.facebook.com/bounceacademynaga"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 text-white/60 transition hover:border-white hover:bg-white/10 hover:text-white"
-              >
-                <FiFacebook size={18} />
-              </a>
-              <a
-                href="https://www.instagram.com/bounce_academyph"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 text-white/60 transition hover:border-white hover:bg-white/10 hover:text-white"
-              >
-                <FiInstagram size={18} />
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

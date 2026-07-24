@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { FiArrowRight, FiFacebook, FiInstagram, FiMail, FiPhone, FiShield, FiStar, FiTruck } from 'react-icons/fi'
+import { FiArrowRight, FiShield, FiStar, FiTruck } from 'react-icons/fi'
 import SectionHeading from '../components/ui/SectionHeading.jsx'
 import SmartImage from '../components/ui/SmartImage.jsx'
+import Footer from '../components/Footer.jsx'
 import { getProducts } from '../lib/db.js'
 import { formatCurrency } from '../utils/format.js'
 import heroFallback from '../assets/hero.png'
@@ -94,10 +95,10 @@ export default function HomePage() {
             <div className="relative">
               <p className="text-xs uppercase tracking-[0.24em] text-white/60">Bounce Academy</p>
               <h1 className="mt-3 max-w-lg text-4xl font-semibold leading-tight tracking-tight sm:text-5xl">
-                Simple gear. Clean choices. Ready for every game.
+                Clean choices. Ready for every game.
               </h1>
               <p className="mt-4 max-w-md text-sm leading-6 text-white/75">
-                Sporty essentials for every day. Bounce Academy is a local brand that makes movement-ready gear for the active lifestyle. Shop our curated collection of apparel, accessories, and footwear.
+                Bounce Academy is a local brand that makes movement-ready gear for the active lifestyle. Shop our curated collection of apparel, accessories, and footwear.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link to="/shop" className="inline-flex items-center justify-center rounded-xl border border-white bg-white px-4 py-2 text-sm font-medium text-black transition hover:translate-y-[-1px]">
@@ -148,7 +149,6 @@ export default function HomePage() {
       <section className="space-y-4 reveal-up">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-gray-500"></p>
             <h2 className="mt-1 text-2xl font-semibold tracking-tight text-black sm:text-3xl">Shop by Category</h2>
             <p className="mt-1 max-w-2xl text-sm text-gray-600">
               Start with the core pieces and jump into the category that fits your style.
@@ -164,35 +164,48 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-3">
-          {categoryCards.map((category, index) => (
-            <Link
-              key={category.key}
-              to={`/shop?category=${encodeURIComponent(category.key)}`}
-              className="group relative min-h-[23rem] overflow-hidden rounded-3xl border border-gray-200 bg-black shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-xl"
-              style={{ animationDelay: `${index * 120}ms` }}
-            >
-              <SmartImage
-                src={category.imageUrl}
-                alt={category.label}
-                className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
-              <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 sm:p-7">
-                <div className="max-w-[75%]">
-                  <p className="text-xs uppercase tracking-[0.24em] text-white/60">{category.eyebrow}</p>
-                  <h3 className="mt-2 text-4xl font-semibold tracking-tight text-white sm:text-5xl">{category.label}</h3>
-                  <p className="mt-3 text-sm text-white/70">{category.count} style{category.count === 1 ? '' : 's'}</p>
-                </div>
-
-                <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition group-hover:border-white/40 group-hover:bg-white/20">
-                  <FiArrowRight className="h-4 w-4" />
-                </span>
+        {isFeaturedLoading ? (
+          <div className="grid gap-4 lg:grid-cols-3">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div
+                key={`category-skeleton-${index}`}
+                className="min-h-[23rem] overflow-hidden rounded-3xl border border-gray-200 bg-gray-100"
+              >
+                <div className="h-full w-full skeleton-shimmer" />
               </div>
-            </Link>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid gap-4 lg:grid-cols-3">
+            {categoryCards.map((category, index) => (
+              <Link
+                key={category.key}
+                to={`/shop?category=${encodeURIComponent(category.key)}`}
+                className="group relative min-h-[23rem] overflow-hidden rounded-3xl border border-gray-200 bg-black shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-xl"
+                style={{ animationDelay: `${index * 120}ms` }}
+              >
+                <SmartImage
+                  src={category.imageUrl}
+                  alt={category.label}
+                  className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 p-6 sm:p-7">
+                  <div className="max-w-[75%]">
+                    <p className="text-xs uppercase tracking-[0.24em] text-white/60">{category.eyebrow}</p>
+                    <h3 className="mt-2 text-4xl font-semibold tracking-tight text-white sm:text-5xl">{category.label}</h3>
+                    <p className="mt-3 text-sm text-white/70">{category.count} style{category.count === 1 ? '' : 's'}</p>
+                  </div>
+
+                  <span className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition group-hover:border-white/40 group-hover:bg-white/20">
+                    <FiArrowRight className="h-4 w-4" />
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="space-y-4 reveal-up">
@@ -252,85 +265,7 @@ export default function HomePage() {
         )}
       </section>
 
-      <footer className="overflow-hidden rounded-3xl border border-black bg-black px-6 py-10 text-white sm:px-8">
-        <div className="grid gap-8 lg:grid-cols-[1.5fr_1fr_1fr_1fr] lg:items-start">
-          <div>
-            <p className="text-xs uppercase tracking-[0.22em] text-white/60">Bounce Academy</p>
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
-              Movement-ready essentials for every day.
-            </h2>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white/60">Explore</h3>
-            <div className="mt-4 flex flex-col gap-3 text-sm text-white/80">
-              <Link to="/shop" className="transition hover:text-white">
-                Shop all products
-              </Link>
-              <Link to="/wishlist" className="transition hover:text-white">
-                Saved items
-              </Link>
-              <Link to="/cart" className="transition hover:text-white">
-                Cart
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white/60">Account</h3>
-            <div className="mt-4 flex flex-col gap-3 text-sm text-white/80">
-              <Link to="/auth" className="transition hover:text-white">
-                Sign in
-              </Link>
-              <Link to="/account" className="transition hover:text-white">
-                My account
-              </Link>
-            </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold uppercase tracking-[0.18em] text-white/60">Connect</h3>
-            <div className="mt-4 flex flex-col gap-3 text-sm text-white/80">
-              <a href="mailto:info@bounceacademy.com" className="inline-flex items-center gap-2 transition hover:text-white">
-                <FiMail size={16} />
-                info@bounceacademy.com
-              </a>
-              <a href="tel:+1234567890" className="inline-flex items-center gap-2 transition hover:text-white">
-                <FiPhone size={16} />
-                0927 437 2354
-              </a>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-8 border-t border-white/10 pt-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-white/50">© {new Date().getFullYear()} Bounce Academy. All rights reserved.</p>
-            </div>
-            <div className="flex gap-4 sm:gap-5">
-              <a
-                href="https://www.facebook.com/bounceacademynaga"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Facebook"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 text-white/60 transition hover:border-white hover:bg-white/10 hover:text-white"
-              >
-                <FiFacebook size={18} />
-              </a>
-              <a
-                href="https://www.instagram.com/bounce_academyph"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-white/20 text-white/60 transition hover:border-white hover:bg-white/10 hover:text-white"
-              >
-                <FiInstagram size={18} />
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   )
 }

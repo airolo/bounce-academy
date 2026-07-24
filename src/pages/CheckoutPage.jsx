@@ -75,7 +75,7 @@ export default function CheckoutPage() {
       })
 
       setIsConfirmModalOpen(false)
-      removeItemsByKeys(selectedCartKeys)
+      await removeItemsByKeys(selectedCartKeys)
       navigate('/account', { state: { orderSuccess: true, orderId: order.id, orderTotal: total } })
     } catch (error) {
       console.error(error)

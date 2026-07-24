@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { getUsers, updateUserRole } from '../../lib/db.js'
+import { FiAlertTriangle, FiX } from 'react-icons/fi'
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
+  const [pendingChange, setPendingChange] = useState(null)
 
   async function loadUsers() {
     setIsLoading(true)
@@ -19,9 +21,21 @@ export default function AdminUsersPage() {
     loadUsers().catch(console.error)
   }, [])
 
-  async function handleRoleChange(id, role) {
-    await updateUserRole(id, role)
-    loadUsers().catch(console.error)
+  function handleRoleChange(id, role) {
+    const target = users.find((u) => u.id === id)
+    setPendingChange({ id, role, name: target?.full_name ?? target?.email ?? 'this user' })
+  }
+
+  async function handleConfirmRoleChange() {
+    if (!pendingChange) return
+    try {
+      await updateUserRole(pendingChange.id, pendingChange.role)
+      setPendingChange(null)
+      await loadUsers()
+    } catch (error) {
+      console.error(error)
+      alert(error.message)
+    }
   }
 
   return (
@@ -118,6 +132,53 @@ export default function AdminUsersPage() {
           </div>
         </>
       )}
+
+      {pendingChange ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          onClick={() => setPendingChange(null)}
+        >
+          <div
+            className="card max-w-md p-6"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <FiAlertTriangle className="h-6 w-6 text-amber-500" />
+                <h2 className="text-lg font-semibold">Confirm Role Change</h2>
+              </div>
+              <button
+                type="button"
+                aria-label="Cancel"
+                onClick={() => setPendingChange(null)}
+                className="text-gray-500 transition hover:text-black"
+              >
+                <FiX size={20} />
+              </button>
+            </div>
+            <p className="mt-4 text-sm text-gray-600">
+              Change <strong>{pendingChange.name}</strong> to <strong>{pendingChange.role}</strong>?
+              This will immediately update their permissions.
+            </p>
+            <div className="mt-5 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setPendingChange(null)}
+                className="button-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmRoleChange}
+                className="button-primary"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

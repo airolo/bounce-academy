@@ -2,7 +2,6 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { supabase } from '../lib/supabaseClient.js'
 
 const AuthContext = createContext(null)
-const REQUEST_TIMEOUT_MS = 12000
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
@@ -155,13 +154,12 @@ export function AuthProvider({ children }) {
   }
 
   async function logout() {
-    // Clear local state first so protected routes immediately stop showing loading.
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
+
     setSession(null)
     setProfile(null)
     setLoading(false)
-
-    const { error } = await supabase.auth.signOut()
-    if (error) throw error
   }
 
   const value = useMemo(

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { FiBox, FiGrid, FiLogOut, FiMenu, FiShoppingBag, FiUsers, FiX } from 'react-icons/fi'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -23,6 +23,17 @@ export default function AdminLayout() {
   function closeMobileNav() {
     setIsMobileNavOpen(false)
   }
+
+  useEffect(() => {
+    if (!isMobileNavOpen) return
+
+    function onKeyDown(event) {
+      if (event.key === 'Escape') closeMobileNav()
+    }
+
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [isMobileNavOpen])
 
   function renderNavLinks(onNavigate) {
     return adminLinks.map(({ to, icon: Icon, label }) => (
@@ -57,7 +68,7 @@ export default function AdminLayout() {
       </header>
 
       {isMobileNavOpen ? (
-        <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={closeMobileNav} aria-hidden="true" />
+        <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={closeMobileNav} />
       ) : null}
 
       <aside
