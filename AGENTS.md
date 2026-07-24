@@ -29,7 +29,7 @@ Bounce Academy is a React + Vite eCommerce storefront for basketball-inspired ap
 
 ```
 src/
-├── components/       Reusable UI (Navbar, ProductCard, FloatingChatbot, Footer, ScrollToTop, ErrorBoundary, etc.)
+├── components/       Reusable UI (Navbar, ProductCard, Footer, ScrollToTop, ErrorBoundary, etc.)
 │   └── ui/           Atomic primitives (QuantityControl, StatusBadge, SmartImage, SectionHeading)
 ├── contexts/         React Context providers (AuthContext, CartContext)
 ├── layouts/          Page layout wrappers (UserLayout, AdminLayout)
