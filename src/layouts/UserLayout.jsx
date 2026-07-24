@@ -1,6 +1,5 @@
 import { Outlet } from 'react-router-dom'
 import Navbar from '../components/Navbar.jsx'
-import FloatingChatbot from '../components/FloatingChatbot.jsx'
 
 export default function UserLayout() {
   return (
@@ -9,7 +8,6 @@ export default function UserLayout() {
       <main>
         <Outlet />
       </main>
-      <FloatingChatbot />
     </div>
   )
 }
