@@ -10,7 +10,6 @@ const links = [
   { label: 'Shop', to: '/shop' },
   { label: 'Training', to: '/training' },
   { label: 'Announcements', to: '/announcements' },
-  { label: 'About Us', to: '/about' },
 ]
 
 export function Navbar() {
