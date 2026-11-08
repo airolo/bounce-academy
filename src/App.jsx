@@ -4,7 +4,6 @@ import { ErrorBoundary } from './components/common/ErrorBoundary'
 import { HomePage } from './pages/HomePage'
 import { LoadingPage } from './pages/LoadingPage'
 import { NotFoundPage } from './pages/NotFoundPage'
-import { AboutPage } from './pages/AboutPage'
 import { LoginPage } from './pages/LoginPage'
 import { RegisterPage } from './pages/RegisterPage'
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage'
@@ -42,7 +41,6 @@ function App() {
               <Route path="/training" element={<TrainingPage />} />
               <Route path="/announcements" element={<AnnouncementsPage />} />
               <Route path="/announcements/:id" element={<CampaignDetailsPage />} />
-              <Route path="/about" element={<AboutPage />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/account" element={<AccountPage />} />
                 <Route path="/cart" element={<CartPage />} />
